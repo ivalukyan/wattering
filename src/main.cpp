@@ -39,6 +39,8 @@ void loop() {
   bottom = arr[1];
   row = arr[2];
 
+  logging("Values:\ntop: ${top}\nbottom: ${bottom}\nrow: ${row}", "DEBUG");
+
   if (top == 1) {
     for (int i = 0; i < 4; i++){
       lcd.setCursor(0, i);
@@ -85,7 +87,7 @@ int* set_cursor(int bottom, int top, int row) {
     top = 1;
     row--;
 
-    String logg = "Cursor upping";
+    String logg = "Cursor upping ${row}";
     logging(logg, "INFO");
   }
   else if (vertValue == 0 && horzValue == 512 && (row >= 0 && row <= 3)) {
@@ -93,7 +95,7 @@ int* set_cursor(int bottom, int top, int row) {
     bottom = 1;
     row++;
 
-    String logg = "Cursor down";
+    String logg = "Cursor down ${row}";
     logging(logg, "INFO");
   }
   int* arr = new int[3] {top, bottom, row};
