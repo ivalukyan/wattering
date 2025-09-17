@@ -1,8 +1,4 @@
-#include <vector>
 #include <LiquidCrystal_I2C.h>
-
-using namespace std;
-
 
 #define VERT A0
 #define HORZ A1
@@ -62,6 +58,8 @@ void loop() {
     logging("Cursor wiil down", "INFO");
   }
 
+  delete [] arr;
+  
   delay(1000);
 }
 
