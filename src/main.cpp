@@ -1,15 +1,17 @@
-#include <RTClib.h>
+#include <vector>
 #include <LiquidCrystal_I2C.h>
+
+using namespace std;
+
 
 #define VERT A0
 #define HORZ A1
 #define SEL 2
 
 LiquidCrystal_I2C lcd(0x27, 20, 2);
-RTC_DS3231 rtc;
 
 void home_view();
-void set_cursor(int bottom, int top, int row);
+vector<int> set_cursor(int bottom, int top, int row);
 void logging(String text_log, String type_log);
 
 struct TypeLog {
@@ -32,27 +34,32 @@ void setup() {
 }
 
 void loop() {
-  bool top = 0; // Положение джойстика
-  bool bottom = 0; // Положение джойстика
+  int top = 0; // Положение джойстика
+  int bottom = 0; // Положение джойстика
   int row = 0; // max = 4; min = 0
 
-  set_cursor(bottom, top, row);
+  vector<int> arr = set_cursor(bottom, top, row);
+  top = arr[0];
+  bottom = arr[1];
+  row = arr[2];
 
-  if (top) {
+  if (top == 1) {
     for (int i = 0; i < 4; i++){
       lcd.setCursor(0, i);
       lcd.print(" ");
     }
     lcd.setCursor(0, 1);
     lcd.print(">");
+    logging("Cursor wiil up", "INFO");
   }
-  else if (bottom) {
+  else if (bottom == 1) {
     for (int i = 0; i < 4; i++){
       lcd.setCursor(0, i);
       lcd.print(" ");
     }
     lcd.setCursor(0, 2);
     lcd.print(">");
+    logging("Cursor wiil down", "INFO");
   }
 
   delay(1000);
@@ -61,9 +68,6 @@ void loop() {
 void home_view() {
   lcd.clear();
   lcd.setCursor(15, 0);
-  DateTime now = rtc.now();
-  String timestamp = String(now.hour()) + ":" + String(now.minute());
-  lcd.print(timestamp);
   lcd.setCursor(0, 0);
   lcd.print(">");
   lcd.setCursor(6, 0);
@@ -74,7 +78,7 @@ void home_view() {
   lcd.print("2. Timer");
 }
 
-void set_cursor(int bottom, int top, int row) {
+vector<int> set_cursor(int bottom, int top, int row) {
   int vertValue = analogRead(VERT);
   int horzValue = analogRead(HORZ);
 
@@ -94,20 +98,16 @@ void set_cursor(int bottom, int top, int row) {
     String logg = "Cursor down";
     logging(logg, "INFO");
   }
-  delay(1000);
+  vector<int> arr = {top, bottom, row};
+  return arr;
 }
 
 void logging(String text_log, String type_log) {
-  DateTime now = rtc.now();
-  String timestamp = String(now.day()) + "/" + 
-                     String(now.month()) + "/" + 
-                     String(now.year());
-
   if (type_log == "INFO"){
-    Serial.println(timestamp + "\t|\t" + TypeLog.INFO + "\t|\t" + text_log);
+    Serial.println(TypeLog.INFO + "\t|\t" + text_log);
   } else if (type_log == "ERROR") {
-    Serial.println(timestamp + "\t|\t" + TypeLog.ERROR + "\t|\t" + text_log);
+    Serial.println(TypeLog.ERROR + "\t|\t" + text_log);
   } else if (type_log == "DEBUG") {
-    Serial.println(timestamp + "\t|\t" + TypeLog.DEBUG + "\t|\t" + text_log);
+    Serial.println(TypeLog.DEBUG + "\t|\t" + text_log);
   }
 }
