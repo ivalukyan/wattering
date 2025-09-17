@@ -11,7 +11,7 @@ using namespace std;
 LiquidCrystal_I2C lcd(0x27, 20, 2);
 
 void home_view();
-vector<int> set_cursor(int bottom, int top, int row);
+int* set_cursor(int bottom, int top, int row);
 void logging(String text_log, String type_log);
 
 struct TypeLog {
@@ -38,7 +38,7 @@ void loop() {
   int bottom = 0; // Положение джойстика
   int row = 0; // max = 4; min = 0
 
-  vector<int> arr = set_cursor(bottom, top, row);
+  int* arr = set_cursor(bottom, top, row);
   top = arr[0];
   bottom = arr[1];
   row = arr[2];
@@ -78,7 +78,7 @@ void home_view() {
   lcd.print("2. Timer");
 }
 
-vector<int> set_cursor(int bottom, int top, int row) {
+int* set_cursor(int bottom, int top, int row) {
   int vertValue = analogRead(VERT);
   int horzValue = analogRead(HORZ);
 
@@ -98,7 +98,7 @@ vector<int> set_cursor(int bottom, int top, int row) {
     String logg = "Cursor down";
     logging(logg, "INFO");
   }
-  vector<int> arr = {top, bottom, row};
+  int arr[3] = {top, bottom, row};
   return arr;
 }
 
