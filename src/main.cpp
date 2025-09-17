@@ -96,7 +96,7 @@ int* set_cursor(int bottom, int top, int row) {
     String logg = "Cursor down";
     logging(logg, "INFO");
   }
-  int arr[3] = {top, bottom, row};
+  int* arr = new int[3] {top, bottom, row};
   return arr;
 }
 
