@@ -4,6 +4,10 @@
 #define HORZ A1
 #define SEL 2
 
+int top = 0;
+int bottom = 0;
+int row = 0;
+
 LiquidCrystal_I2C lcd(0x27, 20, 2);
 
 void home_view();
@@ -30,16 +34,12 @@ void setup() {
 }
 
 void loop() {
-  int top = 0; // Положение джойстика
-  int bottom = 0; // Положение джойстика
-  int row = 0; // max = 4; min = 0
-
   int* arr = set_cursor(bottom, top, row);
   top = arr[0];
   bottom = arr[1];
   row = arr[2];
 
-  logging("Values:\ntop: ${top}\nbottom: ${bottom}\nrow: ${row}", "DEBUG");
+  logging("Values: top: " + String(top) + "bottom: " + String(bottom) + "row: " + String(row), "DEBUG");
 
   if (top == 1) {
     for (int i = 0; i < 4; i++){
@@ -87,7 +87,7 @@ int* set_cursor(int bottom, int top, int row) {
     top = 1;
     row--;
 
-    String logg = "Cursor upping ${row}";
+    String logg = "Cursor upping " + String(row);
     logging(logg, "INFO");
   }
   else if (vertValue == 0 && horzValue == 512 && (row >= 0 && row <= 3)) {
@@ -95,7 +95,7 @@ int* set_cursor(int bottom, int top, int row) {
     bottom = 1;
     row++;
 
-    String logg = "Cursor down ${row}";
+    String logg = "Cursor down " + String(row);
     logging(logg, "INFO");
   }
   int* arr = new int[3] {top, bottom, row};
