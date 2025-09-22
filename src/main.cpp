@@ -4,14 +4,15 @@
 #define HORZ A1
 #define SEL 2
 
+LiquidCrystal_I2C lcd(0x27, 20, 3);
+
 int top = 0;
 int bottom = 0;
 int row = 0;
 
-LiquidCrystal_I2C lcd(0x27, 20, 2);
-
 void home_view();
 int* set_cursor(int bottom, int top, int row);
+void move_cursor(int bottom, int top, int row);
 void logging(String text_log, String type_log);
 
 struct TypeLog {
@@ -23,7 +24,7 @@ struct TypeLog {
 unsigned long startTime = 0;
 
 void setup() {
-  lcd.begin(20, 2); 
+  lcd.begin(20, 3); 
   Serial.begin(9600);
 
   lcd.setCursor(0, 0);
@@ -34,31 +35,14 @@ void setup() {
 }
 
 void loop() {
-  int* arr = set_cursor(bottom, top, row);
+  int* arr = xyz_cursor(bottom, top, row);
   top = arr[0];
   bottom = arr[1];
   row = arr[2];
 
-  logging("Values: top: " + String(top) + "bottom: " + String(bottom) + "row: " + String(row), "DEBUG");
+  logging("Values: top: " + String(top) + " bottom: " + String(bottom) + " row: " + String(row), "DEBUG");
 
-  if (top == 1) {
-    for (int i = 0; i < 4; i++){
-      lcd.setCursor(0, i);
-      lcd.print(" ");
-    }
-    lcd.setCursor(0, 1);
-    lcd.print(">");
-    logging("Cursor wiil up", "INFO");
-  }
-  else if (bottom == 1) {
-    for (int i = 0; i < 4; i++){
-      lcd.setCursor(0, i);
-      lcd.print(" ");
-    }
-    lcd.setCursor(0, 2);
-    lcd.print(">");
-    logging("Cursor wiil down", "INFO");
-  }
+  move_cursor(bottom, top, row);
 
   delete [] arr;
   
@@ -78,11 +62,31 @@ void home_view() {
   lcd.print("2. Timer");
 }
 
-int* set_cursor(int bottom, int top, int row) {
+void move_cursor(int bottom, int top, int row) {
+  if (top == 1) {
+    lcd.setCursor(0, row + 1);
+    lcd.print(" ");
+    lcd.setCursor(0, row);
+    lcd.print(">");
+    logging("Cursor wiil up", "INFO");
+  }
+  else if (bottom == 1) {
+    lcd.setCursor(0, row - 1);
+    lcd.print(" ");
+    lcd.setCursor(0, row);
+    lcd.print(">");
+    logging("Cursor wiil down", "INFO");
+  }
+  else{
+    logging("Cusor wiil stay", "INFO");
+  }
+}
+
+int* xyz_cursor(int bottom, int top, int row) {
   int vertValue = analogRead(VERT);
   int horzValue = analogRead(HORZ);
 
-  if (vertValue == 1023 && horzValue == 512 && (row >= 0 && row <= 3)) {
+  if ((vertValue > 512 && vertValue <= 1023) && horzValue == 512 && (row > 0 && row < 3)) {
     bottom = 0;
     top = 1;
     row--;
@@ -90,13 +94,23 @@ int* set_cursor(int bottom, int top, int row) {
     String logg = "Cursor upping " + String(row);
     logging(logg, "INFO");
   }
-  else if (vertValue == 0 && horzValue == 512 && (row >= 0 && row <= 3)) {
+  else if ((vertValue >= 0 && vertValue < 512) && horzValue == 512 && (row > 0 && row < 3)) {
     top = 0;
     bottom = 1;
     row++;
 
     String logg = "Cursor down " + String(row);
     logging(logg, "INFO");
+  } else {
+    if ((vertValue >= 0 && vertValue < 512) && horzValue == 512 && row == 0) {
+      top = 0;
+      bottom = 1;
+      row++;
+    } else if ((vertValue > 512 && vertValue <= 1023) && horzValue == 512 && row == 3){
+      bottom = 0;
+      top = 1;
+      row--;
+    }
   }
   int* arr = new int[3] {top, bottom, row};
   return arr;
@@ -104,10 +118,10 @@ int* set_cursor(int bottom, int top, int row) {
 
 void logging(String text_log, String type_log) {
   if (type_log == "INFO"){
-    Serial.println(TypeLog.INFO + "\t|\t" + text_log);
+    Serial.println(TypeLog.INFO + "| " + text_log);
   } else if (type_log == "ERROR") {
-    Serial.println(TypeLog.ERROR + "\t|\t" + text_log);
+    Serial.println(TypeLog.ERROR + "| " + text_log);
   } else if (type_log == "DEBUG") {
-    Serial.println(TypeLog.DEBUG + "\t|\t" + text_log);
+    Serial.println(TypeLog.DEBUG + "| " + text_log);
   }
 }
